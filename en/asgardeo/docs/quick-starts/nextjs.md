@@ -65,7 +65,7 @@ Create your new Next.js app.
 
     cd asgardeo-nextjs
 
-    yran install
+    yarn install
 
     yarn dev
     ```
@@ -160,19 +160,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 ```
 
-
-
 Create a Route Handler file in the `src/app/api/auth/[...nextauth]/route.ts` location. 
 
 ```bash
 mkdir -p src/app/api/auth/\[...nextauth\]
 
 touch mkdir -p src/app/api/auth/\[...nextauth\]/route.ts
-
 ```
 
 !!! Note
-    The directory `src/app/api/auth/[...nextauth]/route.ts` in a Next.js project is used to define a dynamic API route for handling authentication. The `[...nextauth]` is a catch-all route that processes multiple authentication-related requests such as sign-in, sign-out, and session management. The route.ts file specifies the logic for these operations, typically by exporting handlers for HTTP methods like GET and POST. This setup centralizes authentication logic, supports OAuth providers like Google or GitHub, and integrates seamlessly into Next.js applications for secure and scalable authentication workflows.
+    The directory `src/app/api/auth/[...nextauth]/route.ts` in a Next.js project is used to define a dynamic API route for handling authentication. The `[...nextauth]` is a catch-all route that processes multiple authentication-related requests such as sign-in, sign-out, and session management. The `route.ts` file specifies the logic for these operations, typically by exporting handlers for HTTP methods like GET and POST. This setup centralizes authentication logic, supports OAuth providers like Google or GitHub, and integrates seamlessly into Next.js applications for secure and scalable authentication workflows.
 
 
 Update the `src/app/api/auth/[...nextauth]/route.ts` file with the following code. 
@@ -181,7 +178,6 @@ Update the `src/app/api/auth/[...nextauth]/route.ts` file with the following cod
 import { handlers } from "@/auth" 
 export const { GET, POST } = handlers
 ```
-
 
 Next, create `src/middleware.ts` file with the following code. 
 
@@ -290,23 +286,19 @@ Then, update `page.tsx` with the following highlighted line to display the usern
 ```javascript title="page.tsx" hl_lines="4"
 
 ...
-          <>
-            <p> You are now signed in!</p>
-            <p> hello {session.user?.username}</p>
-            <form
-              action={async () => {
-                "use server"
-                await signOut()
-              }}
-            >
-              <button type="submit">Sign Out</button>
-            </form>
-          </>
-
+<>
+  <p> You are now signed in!</p>
+  <p> hello {session.user?.username}</p>
+  <form
+    action={async () => {
+      "use server"
+      await signOut()
+    }}
+  >
+    <button type="submit">Sign Out</button>
+  </form>
+</>
 ...
 
 ```
-
-
-
 
