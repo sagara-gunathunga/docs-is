@@ -494,7 +494,7 @@ nav:
   - React Guide:
     - Introduction: complete-guides/react/introduction.md
     - Prerequisite: complete-guides/react/prerequisite.md
-    - Configure an application: complete-guides/react/register-an-application.md
+    - Register an application: complete-guides/react/register-an-application.md
     - Create a React app: complete-guides/react/create-a-react-app.md
     - Configure Asgardeo SDK: complete-guides/react/install-asgardeo-sdk.md
     - Add login and logout: complete-guides/react/add-login-and-logout.md
@@ -506,7 +506,7 @@ nav:
   - Node.js Guide:
     - Introduction: complete-guides/nodejs/introduction.md
     - Prerequisite: complete-guides/nodejs/prerequisite.md
-    - Configure an application: complete-guides/nodejs/register-an-application.md
+    - Register an application: complete-guides/nodejs/register-an-application.md
     - Create a Node.js app: complete-guides/nodejs/create-a-nodejs-app.md
     - Configure Passport Asgardeo: complete-guides/nodejs/install-passport-asgardeo.md
     - Add login and logout: complete-guides/nodejs/add-login-and-logout.md
@@ -514,7 +514,18 @@ nav:
     - Securing Routes: complete-guides/nodejs/securing-routes-within-the-app.md
     - Accessing protected API : complete-guides/nodejs/accessing-protected-api.md
     - Next Steps: complete-guides/nodejs/next-steps.md
-
+  - Nextjs Guide:
+    - Introduction: complete-guides/nextjs/introduction.md
+    - Prerequisite: complete-guides/nextjs/prerequisite.md
+    - Register an application: complete-guides/nextjs/register-an-application.md
+    - Create a Next.js app: complete-guides/nextjs/create-app.md
+    - Configure Asgardeo provider: complete-guides/nextjs/install-asgardeo-sdk.md
+    - Add login and logout: complete-guides/nextjs/add-login-and-logout.md
+    - Display user details: complete-guides/nextjs/display-logged-in-user-details.md
+    - Securing Routes: complete-guides/nextjs/securing-routes-within-the-app.md
+    - Accessing protected API : complete-guides/nextjs/accessing-protected-api.md
+    - Manage tokens in Next.js : complete-guides/nextjs/manage-tokens-in-apps.md
+    - Next Steps: complete-guides/nextjs/next-steps.md
 not_in_nav: |
   /page-not-found.md
   /get-started/explore-asgardeo.md
