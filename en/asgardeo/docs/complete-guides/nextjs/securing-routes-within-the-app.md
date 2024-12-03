@@ -3,12 +3,13 @@ template: templates/complete-guide.html
 heading: Securing Routes within the app
 read_time: 2 min
 ---
-Assume we have a `<Profile/>` component that should only be accessible when a user is logged in. Because if a valid user is not in the session, there is no point of showing an empty profile page. Therefore we need to secure the route: http://localhost:3000/profile itself. This can vary depending on the router that you are using. In this example, we will be using the Next router to demonstrate how to secure a route using auth.js.
+
+The `<Profile/>` component we developed in the previous step should only be accessible when a user is already logged in. Because if a valid user is not in the session, there is no point of showing an empty profile page. Therefore we need to secure the route: http://localhost:3000/profile itself. This can vary depending on the router that you are using. In this example, we will be using the Next router to demonstrate how to secure a route using Auth.js.
 
 
 ## Create a Higher-Order Component (HOC) - withProtectedRoute
 
-A higher-order component in React is a function that takes a component and returns a new component. The HOC `withProtectedRoute` will check if a user is authenticated and either render the component or redirect the user to the login page.
+A higher-order component in React is a function that takes a component and returns a new component (with additional functionality). The HOC `withProtectedRoute` will check if a user is authenticated and either render the component or redirect the user to the login page.
 
 This can be achieved by using the status object in the `useSession()` hook provided by Auth.js. The status object can have three values depending on the authenticated state.
 
