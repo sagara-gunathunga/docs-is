@@ -1,7 +1,7 @@
 ---
 template: templates/complete-guide.html
 heading: Display logged-in user details
-read_time: 2 min
+read_time: 4 min
 ---
 
 At this point, we’ve successfully implemented login and logout capabilities using the Asgardeo provider for Auth.js. The next step is to explore how to access and display logged-in user details within the app utilizing the callbacks provided by auth.js library. To retrieve user information from the ID token provided by Asgardeo, the simplest approach is to use the JWT (JSON Web Token) returned during authentication. In auth.js, you can leverage the JWT callback function to access and manipulate this token. The JWT callback is triggered whenever a JWT is created or updated (e.g., at sign-in), making it a great place to include the user's information
@@ -165,9 +165,180 @@ Then, you can update `page.tsx` as given below to display the above user attribu
 
 ```
 
-
 !!! Tip
 
     If you don’t get any value for given_name and family_name, it might be because you have not added these values when creating the user in Asgardeo. You can add these values either using the **Asgardeo console** or logging into the **My Account** of that particular user.
+
+
+## Displaying user details in the server side
+
+Using the above information from the `session` object. Let's create a `ServerProfile` server component to display the user details. To do this, create a file `/src/app/server-profile/page.tsx` as follows.
+
+```javascript title="/src/app/server-profile/page.tsx"
+import { auth } from "@/auth";
+import { SignOutButton } from "@/components/sign-out-button";
+import { redirect } from "next/navigation";
+
+interface UserDetails {
+    emails: string[];
+    name: {
+        givenName: string;
+        familyName: string;
+    };
+}
+
+const fetchUserDetails = async (accessToken: string): Promise<UserDetails> => {
+    try {
+        const response = await fetch(process.env.NEXT_PUBLIC_AUTH_ASGARDEO_ME_ENDPOINT as string, {
+            method: "GET",
+            headers: {
+                Accept: "application/scim+json",
+                "Content-Type": "application/scim+json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch protected data");
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error("Error fetching protected data:", error);
+        throw error;
+    }
+};
+
+const ServerProfile = async () => {
+    const session = await auth();
+
+    if (!session || !session.user || !session.user.access_token) {
+        return;
+    }
+
+    let userDetails: UserDetails;
+
+    try {
+        userDetails = await fetchUserDetails(session.user.access_token);
+    } catch {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                <h1>Failed to fetch user details</h1>
+            </div>
+        );
+    }
+
+    const goToIndex = async () => {
+        "use server";
+        redirect("/");
+    };
+
+    return (
+        <div className="h-screen w-full flex flex-col items-center justify-center">
+            <h1 className="mb-5">Profile Page</h1>
+            <p>Email: {userDetails.emails?.[0]}</p>
+            <p>First Name: {userDetails.name?.givenName}</p>
+            <p>Last Name: {userDetails.name?.familyName}</p>
+            <form action={goToIndex}>
+                <button
+                    type="submit"
+                    className="rounded-full border border-solid flex items-center justify-center text-sm h-10 px-4 mt-3"
+                >
+                    Go to index page
+                </button>
+            </form>
+            <div className="mt-5">
+                <SignOutButton />
+            </div>
+        </div>
+    );
+};
+
+export default ServerProfile;
+```
+
+This component is fully server-side rendered and will fetch the user details from the Asgardeo server. The `fetchUserDetails` function is used to fetch the user details from the Asgardeo server using the access token. The `ServerProfile` component will display the user details if the user is logged in. If the user is not logged in, the component will display an error message.
+
+When a user is logged in and if your visit **http://localhost:3000/server-profile**, the following content should be visible:
+
+![Profile screen (server component)]({{base_path}}/complete-guides/nextjs/assets/img/image23.png){: width="800" style="display: block; margin: 0;"}
+
+
+## Displaying user details in the client side
+
+In previous steps we used session data and retrieved current user information using the session object in the `auth()` function provided by the Auth.js library. What if we wanted to do the same in the client-side? As we can have both client and server components in Next.js, it is important to have both as we want to secure both components using authentication with Next.js and Asgardeo.
+
+The approach is very similar to server-side components. To demonstrate this, let’s create a user profile component in our application. To get session information in the client-side, you can use the `useSession()` hook offered by Auth.js. Now using this hook, let's create a file `/src/app/client-profile/page.tsx` as follows.
+
+```javascript title="/src/app/client-profile/page.tsx"
+"use client";
+
+import { SignOutButton } from "@/components/sign-out-button";
+import { useSession } from "next-auth/react";
+
+export default function Profile() {
+    const { data: session } = useSession()
+
+    if (!session) {
+        return (
+            <div className="h-screen w-full flex items-center justify-center">
+                <h1>You need to sign in to view this page</h1>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-screen w-full flex flex-col items-center justify-center">
+            <h1 className="mb-5">Profile Page</h1>
+            <p>Email : {session?.user?.email}</p>
+            <p>First Name : {session?.user?.given_name}</p>
+            <p>Last Name : {session?.user?.family_name}</p>
+            <div className="mt-5">
+                <SignOutButton />
+            </div>
+        </div>
+    );
+}
+
+```
+
+Since we are accessing the hooks provided by the Auth.js, it is important to wrap the whole application using the `<SessionProvider/>` provider. This can be achieved by wrapping the `/src/app/layout.tsx` file as it is the entry point of the application.
+
+```javascript title="/src/app/profile/page.tsx" hl_lines="14-16"
+import { SessionProvider } from "next-auth/react";
+
+...
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SessionProvider>
+          {children}
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}
+
+```
+
+!!! note
+    This a good time to remove the `<SessionProvider/>` we added to the `/src/app/page.tsx` in previous steps as this is no longer required.
+
+
+When a user is logged in and if your visit http://localhost:3000/client-profile, the following content should be visible:
+
+![Profile screen (client component)]({{base_path}}/complete-guides/nextjs/assets/img/image21.png){: width="800" style="display: block; margin: 0;"}
+
+When a user is not logged in, it should look as follows:
+
+![Profile screen (Not logged in)]({{base_path}}/complete-guides/nextjs/assets/img/image22.png){: width="800" style="display: block; margin: 0;"}
+
 
 In this step, we further improved our Next.js app to display the user attributes. As the next step, we will try to secure routes within the app.
