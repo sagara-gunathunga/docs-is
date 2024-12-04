@@ -1,13 +1,59 @@
 ---
 template: templates/complete-guide.html
 heading: Securing Routes within the app
-read_time: 2 min
+read_time: 4 min
 ---
 
-The `<Profile/>` component we developed in the previous step should only be accessible when a user is already logged in. Because if a valid user is not in the session, there is no point of showing an empty profile page. Therefore we need to secure the route: http://localhost:3000/profile itself. This can vary depending on the router that you are using. In this example, we will be using the Next router to demonstrate how to secure a route using Auth.js.
+The `<Profile/>` components (server-side and client-side) we developed in the previous step should only be accessible when a user is already logged in. Because if a valid user is not in the session, there is no point of showing an empty profile page. Therefore we need to secure the routes: **http://localhost:3000/client-profile** and **http://localhost:3000/server-profile**. In this example, we will be demonstrating how to secure a route using Auth.js in both server-side and client-side.
+
+## Securing the Server-Side Components
+
+### Update middleware to secure the server-side route
+
+Recall that we created a  `middleware.ts` file in the root of the `src` directory when configuring Auth.js? We will now update this file with the following configuration to securet the `/server-profile` route as follows.
+
+```javascript title="src/middleware.ts" hl_lines="4"
+export { auth as middleware } from "@/auth"
+
+export const config = {
+    matcher: ["/server-profile"]
+};
+```
+
+By defining a `matcher` configuration, we can control which routes trigger the middleware. For example, with a matcher set to ["/server-profile"], the middleware only runs for requests to **/server-profile**. This approach centralizes authentication logic while keeping other routes unaffected.
+
+### Handle redirection using callbacks
+
+Using the `authorized` callback in Auth.js, we can ensure that only authenticated users can access protected routes.
+
+```javascript title="src/auth.ts"
+...
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...
+  callbacks: {
+    ...
+    authorized: async ({ request, auth }) => {
+      // Logged in users are authenticated, otherwise redirect to index page
+      console.log({ request, auth });
+
+      if (!auth) {
+        return Response.redirect(new URL("/", request.nextUrl))
+      }
+      
+      return !!auth
+    },
+  }
+})
+```
+
+This callback checks the auth parameter, which holds the user's authentication data. If the user is not authenticated (auth is null or undefined), they are redirected to the login page (/) using `Response.redirect()`. For authenticated users, the function returns true, allowing access.
+
+Now verify that you cannot access http://localhost:3000/server-profile URL when you are not logged in. You will be redirected to http://localhost:3000 if you do not have a valid user logged in.
 
 
-## Create a Higher-Order Component (HOC) - withProtectedRoute
+## Securing the Client-Side Components
+
+### Create a Higher-Order Component (HOC) - withProtectedRoute
 
 A higher-order component in React is a function that takes a component and returns a new component (with additional functionality). The HOC `withProtectedRoute` will check if a user is authenticated and either render the component or redirect the user to the login page.
 
@@ -98,7 +144,7 @@ export default withProtectedRoute(Profile);
 
 ```
 
-Now verify that you cannot access http://localhost:3000/profile URL when you are not logged in. You will be redirected to http://localhost:3000 if you do not have a valid user logged in.
+Now verify that you cannot access http://localhost:3000/client-profile URL when you are not logged in. You will be redirected to http://localhost:3000 if you do not have a valid user logged in.
 
 
 In this step, we looked into how to secure component routes within a Next.js app. Next, we will try to access a protected API from our Next.js app, which is a common requirement.
