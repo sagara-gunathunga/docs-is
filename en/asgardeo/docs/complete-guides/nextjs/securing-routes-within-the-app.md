@@ -34,8 +34,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ...
     authorized: async ({ request, auth }) => {
       // Logged in users are authenticated, otherwise redirect to index page
-      console.log({ request, auth });
-
       if (!auth) {
         return Response.redirect(new URL("/", request.nextUrl))
       }

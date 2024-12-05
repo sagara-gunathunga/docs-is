@@ -179,54 +179,8 @@ import { auth } from "@/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { redirect } from "next/navigation";
 
-interface UserDetails {
-    emails: string[];
-    name: {
-        givenName: string;
-        familyName: string;
-    };
-}
-
-const fetchUserDetails = async (accessToken: string): Promise<UserDetails> => {
-    try {
-        const response = await fetch(process.env.NEXT_PUBLIC_AUTH_ASGARDEO_ME_ENDPOINT as string, {
-            method: "GET",
-            headers: {
-                Accept: "application/scim+json",
-                "Content-Type": "application/scim+json",
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch protected data");
-        }
-
-        return response.json();
-    } catch (error) {
-        console.error("Error fetching protected data:", error);
-        throw error;
-    }
-};
-
 const ServerProfile = async () => {
     const session = await auth();
-
-    if (!session || !session.user || !session.user.access_token) {
-        return;
-    }
-
-    let userDetails: UserDetails;
-
-    try {
-        userDetails = await fetchUserDetails(session.user.access_token);
-    } catch {
-        return (
-            <div className="h-screen w-full flex items-center justify-center">
-                <h1>Failed to fetch user details</h1>
-            </div>
-        );
-    }
 
     const goToIndex = async () => {
         "use server";
@@ -236,9 +190,9 @@ const ServerProfile = async () => {
     return (
         <div className="h-screen w-full flex flex-col items-center justify-center">
             <h1 className="mb-5">Profile Page</h1>
-            <p>Email: {userDetails.emails?.[0]}</p>
-            <p>First Name: {userDetails.name?.givenName}</p>
-            <p>Last Name: {userDetails.name?.familyName}</p>
+            <p>Email: {session?.user?.email}</p>
+            <p>First Name: {session?.user?.given_name}</p>
+            <p>Last Name: {session?.user?.family_name}</p>
             <form action={goToIndex}>
                 <button
                     type="submit"
